@@ -20,3 +20,19 @@ exchainRouter.get('/address/:address', async (req, res) => {
     ...response
   });
 });
+
+exchainRouter.get('/asset/:assetName', async (req, res) => {
+  // 3. queries/utils required to build response to be done later
+  res.status(200).json({
+    // 1. build the response structure here, using mock values to quickly be able to test integration
+    wip: true,
+  });
+});
+
+exchainRouter.get('/balances/:address', async (req, res) => {
+  res.status(200).json({
+    wip: true,
+  });
+});
+
+// 2. continue with the rest of the endpoints...
