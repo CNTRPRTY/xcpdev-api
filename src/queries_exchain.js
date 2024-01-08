@@ -17,7 +17,7 @@ export class QueriesExchain {
     static async getAddressBalanceAssetsCount(db, address) {
         // excludes XCP
         const sql = `
-            SELECT COUNT(*)
+            SELECT COUNT(*) AS count
             FROM balances
             WHERE address = $address
             AND quantity != 0
@@ -36,11 +36,11 @@ export class QueriesExchain {
     static async getIssuerAssetsCount(db, address) {
         // TODO does not consider issuance transfers
         const sql = `
-            SELECT COUNT(*)
+            SELECT COUNT(*) AS count
             FROM issuances
             WHERE issuer = $issuer
             AND status = 'valid'
-            GROUP BY asset_name;
+            GROUP BY asset;
         `;
         const params_obj = {
             $issuer: address,
