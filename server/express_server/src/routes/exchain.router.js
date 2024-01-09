@@ -1,7 +1,11 @@
+/* global BigInt */
+// https://github.com/eslint/eslint/issues/11524#issuecomment-473790677
+
 import { Router } from "express";
 
 import { db } from "../db.js";
 import { QueriesExchain } from "../queries_exchain.js";
+import { quantityWithDivisibility } from '../util.js'
 import { BITCOIN_VERSION, COUNTERPARTY_VERSION } from "../config.js";
 import { cached_blocks, cached_mempool, cached_transactions } from "../index.js";
 
@@ -10,11 +14,25 @@ export const exchainRouter = Router();
 
 exchainRouter.get('/address/:address', async (req, res) => {
   const { address } = req.params;
-  const response = await QueriesExchain.getAddressInfo(db, address);
+
+  const held = await QueriesExchain.getAddressBalanceAssetsCount(db, address);
+  const owned = await QueriesExchain.getIssuerAssetsCount(db, address);
+
+  const xcpBalanceText = await QueriesExchain.getXcpBalance(db, address);
+  const xcp_balance = quantityWithDivisibility(true, BigInt(xcpBalanceText));
 
   res.status(200).json({
     address,
-    ...response
+    assets: {
+      held,
+      owned,
+    },
+    estimated_value: {
+      btc: "0",
+      usd: "0",
+      xcp: "0",
+    },
+    xcp_balance,
   });
 });
 
