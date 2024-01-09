@@ -36,6 +36,10 @@ exchainRouter.get('/address/:address', async (req, res) => {
   });
 });
 
+// TODO
+// - check XPC / BTC response differences
+// - supply: formatted with divisibility?
+// - type: find all possible values, and implement relevant logic
 exchainRouter.get('/asset/:assetName', async (req, res) => {
 
   // TODO (later)
