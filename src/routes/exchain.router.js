@@ -86,7 +86,7 @@ exchainRouter.get('/asset/:assetName', async (req, res) => {
         }
       },
       owner: issuance_row.issuer,
-      supply: issuance_row.quantity,
+      supply: issuance_row.quantity_text,
       type: "named"
     });
   }
