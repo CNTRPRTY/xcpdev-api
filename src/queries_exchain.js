@@ -88,7 +88,10 @@ export class QueriesExchain {
     static async getGenesisIssuanceByAssetName(db, asset_name) {
         // genesis (could be multiple with same block)
         const sql = `
-            SELECT i.*, CAST(i.quantity AS TEXT) AS quantity_text
+            SELECT
+                i.*,
+                CAST(i.quantity AS TEXT) AS quantity_text,
+                i.divisible AS genesis_divisible
             FROM assets a
             JOIN issuances i ON (
                 a.asset_name = i.asset AND
