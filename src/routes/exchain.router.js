@@ -6,8 +6,8 @@ import { Router } from "express";
 import { db } from "../db.js";
 import { QueriesExchain } from "../queries_exchain.js";
 import { quantityWithDivisibility } from '../util.js'
-import { BITCOIN_VERSION, COUNTERPARTY_VERSION } from "../config.js";
-import { cached_blocks, cached_mempool, cached_transactions } from "../index.js";
+
+// TODO btc / xcp values at 0, and not showing satoshis, could cause issues?
 
 // xchain.io/api replacement
 export const exchainRouter = Router();
