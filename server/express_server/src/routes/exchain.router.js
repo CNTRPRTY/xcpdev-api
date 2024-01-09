@@ -67,7 +67,7 @@ exchainRouter.get('/asset/:assetName', async (req, res) => {
       asset_id: asset_row.asset_id,
       asset_longname: asset_row.asset_longname,
       description: issuance_row.description,
-      divisible: issuance_row.divisible,
+      divisible: issuance_row.genesis_divisible,
       estimated_value: {
         btc: "0",
         usd: "0",
