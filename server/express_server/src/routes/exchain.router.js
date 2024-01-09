@@ -135,7 +135,6 @@ exchainRouter.get('/dispenses/:identifier', async (req, res) => {
 
 exchainRouter.get('/tx/:tx_hash', async (req, res) => {
   const { tx_hash } = req.params;
-  // NOTE: identifier can be either address or asset or block or transaction
   res.status(200).json({
     block_index: 728085,
     btc_amount: "6380000",
@@ -148,6 +147,128 @@ exchainRouter.get('/tx/:tx_hash', async (req, res) => {
   });
 });
 
+exchainRouter.get('/holders/:asset', async (req, res) => {
+  const { asset } = req.params;
+  res.status(200).json({
+    asset: "PEPECASH",
+    asset_longname: "",
+    data: [
+      {
+        address: "1BurnPepexxxxxxxxxxxxxxxxxxxAK33R",
+        estimated_value: {
+          btc: "1653.70218485",
+          usd: "3107535.90",
+          xcp: "363020.98938757"
+        },
+        percentage: "30.25174912",
+        quantity: "302517491.15631030"
+      },
+      {
+        address: "1AqUTSTGB6coR5AYcwFFM6nXoULapXqtdL",
+        estimated_value: {
+          btc: "564.41265737",
+          usd: "1060609.71",
+          xcp: "123899.96407927"
+        },
+        percentage: "10.32499701",
+        quantity: "103249970.06606090"
+      },
+    ],
+    total: 2
+  });
+});
 
+exchainRouter.get('/issuances/:identifier', async (req, res) => {
+  const { identifier } = req.params;
+  // NOTE: identifier can be either address or asset or block
+  res.status(200).json({
+    data: [
+      {
+        asset: "A6360128538192758000",
+        asset_longname: "",
+        block_index: 779652,
+        description: "STAMP:iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+        divisible: false,
+        fee_paid: "0.00000000",
+        issuer: "1GotRejB6XsGgMsM79TvcypeanDJRJbMtg",
+        locked: false,
+        quantity: "1",
+        source: "1GotRejB6XsGgMsM79TvcypeanDJRJbMtg",
+        status: "valid",
+        timestamp: 1678151949,
+        transfer: false,
+        tx_hash: "eb3da8146e626b5783f4359fb1510729f4aad923dfac45b6f1f3a2063907147c",
+        tx_index: 2262969
+      },
+      {
+        asset: "A7337447728884561000",
+        asset_longname: "",
+        block_index: 779652,
+        description: "stamp:iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+        divisible: false,
+        fee_paid: "0.00000000",
+        issuer: "1GotRejB6XsGgMsM79TvcypeanDJRJbMtg",
+        locked: false,
+        quantity: "1",
+        source: "1GotRejB6XsGgMsM79TvcypeanDJRJbMtg",
+        status: "valid",
+        timestamp: 1678151949,
+        transfer: false,
+        tx_hash: "17686488353b65b128d19031240478ba50f1387d0ea7e5f188ea7fda78ea06f4",
+        tx_index: 2262968
+      }
+    ],
+    total: 2
+  });
+});
+
+exchainRouter.get('/sends/:identifier', async (req, res) => {
+  const { identifier } = req.params;
+  // NOTE: identifier can be either address or asset or block
+  res.status(200).json({
+    data: [
+      {
+        asset: "DANKGALLERY",
+        asset_longname: "",
+        block_index: 779652,
+        destination: "17UiAVenbUCMVBhAyg5PhvpMAfAyRhpXZE",
+        memo: "",
+        quantity: "1",
+        source: "1Lhoi43wAkTgei1WK5drpSF9V8Y76jnj89",
+        status: "valid",
+        timestamp: 1678151949,
+        tx_hash: "0541143295e7d2ea5400d46d334cce3db206696cc3c979f2983a6a8fb1e143d0",
+        tx_index: 2262971
+      },
+      {
+        asset: "PEPECASH",
+        asset_longname: "",
+        block_index: 779652,
+        destination: "15r86m7teh6zwqa8o1Dqu7nrnSPkNRL5PW",
+        memo: "",
+        quantity: "3039.90000000",
+        source: "1F5DVeTDs7EGcNnoqaRAmC4sEy8v5ELE7B",
+        status: "valid",
+        timestamp: 1678151949,
+        tx_hash: "640c8b4ace7965af2380f96c677ac5027170a51a17f771651fe3e5be9b8eaa07",
+        tx_index: 2262970
+      },
+      {
+        asset: "WOJAKPARTY",
+        asset_longname: "",
+        block_index: 779652,
+        destination: "1CCPbFbST8ruJrTGjm2Ss5aTAaqng4naBN",
+        memo: "",
+        quantity: "1",
+        source: "1KDf6ZbetZfWqeQmCddupnjMnQN7fZTiiB",
+        status: "valid",
+        timestamp: 1678151949,
+        tx_hash: "3c9d2e9c3f46b6f053ff27e7a9d57c963550cc58ca49c9e95cc3b2fd69200970",
+        tx_index: 2262967
+      }
+    ],
+    total: 3
+  });
+});
 
 // 2. continue with the rest of the endpoints...
