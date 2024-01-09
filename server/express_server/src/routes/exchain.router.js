@@ -37,36 +37,55 @@ exchainRouter.get('/address/:address', async (req, res) => {
 });
 
 exchainRouter.get('/asset/:assetName', async (req, res) => {
-  const { asset } = req.params;
-  // 3. queries/utils required to build response to be done later
-  res.status(200).json({
-    // 1. build the response structure here, using mock values to quickly be able to test integration
-    asset: 'RAREPEPE',
-    asset_id: 136744851026,
-    asset_longname: "",
-    description: "http://myrarepepe.com/json/rarepepe.json",
-    divisible: false,
-    estimated_value: {
-      btc: "6.54321000",
-      usd: "285231.61032000",
-      xcp: "56882.63931148"
-    },
-    issuer: "1GQhaWqejcGJ4GhQar7SjcCfadxvf5DNBD",
-    locked: true,
-    market_info: {
-      btc: {
-        floor: "13.25000000",
-        price: "6.54321000"
+
+  // TODO (later)
+  // - can req.params.assetName be the longname?
+  // - genesis description, at least for now
+  // - genesis divisibility (ignoring resets), at least for now
+  // - genesis issuer, at least for now
+  // - genesis locked, at least for now
+  // - owner = issuer ok?
+  // - supply = genesis quantity, at least for now
+
+  const { assetName } = req.params;
+  const asset_row = await QueriesExchain.getAssetRowByAssetName(db, assetName);
+
+  if (!asset_row) {
+    res.status(404).json({
+      error: '404 Not Found'
+    });
+  }
+  else {
+    const issuance_row = await QueriesExchain.getGenesisIssuanceByAssetName(db, asset_row.asset_name);
+    
+    res.status(200).json({
+      asset: asset_row.asset_name,
+      asset_id: asset_row.asset_id,
+      asset_longname: asset_row.asset_longname,
+      description: issuance_row.description,
+      divisible: issuance_row.divisible,
+      estimated_value: {
+        btc: "0",
+        usd: "0",
+        xcp: "0"
       },
-      xcp: {
-        floor: "0.00000000",
-        price: "1700.00000000"
-      }
-    },
-    owner: "1GQhaWqejcGJ4GhQar7SjcCfadxvf5DNBD",
-    supply: 298,
-    type: "named"
-  });
+      issuer: issuance_row.issuer,
+      locked: issuance_row.locked,
+      market_info: {
+        btc: {
+          floor: "0",
+          price: "0"
+        },
+        xcp: {
+          floor: "0",
+          price: "0"
+        }
+      },
+      owner: issuance_row.issuer,
+      supply: issuance_row.quantity,
+      type: "named"
+    });
+  }
 });
 
 exchainRouter.get('/balances/:address', async (req, res) => {

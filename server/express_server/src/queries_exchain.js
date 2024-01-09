@@ -69,15 +69,58 @@ export class QueriesExchain {
         }
     }
 
-    static async getAssetInfo(db, asset) {
-        try {
-            
-            return {
-                asset: asset.toUpperCase(),
-            }
-        } catch (error) {
-            console.error('Internal server error', error);
-            throw error;
+    static async getAssetRowByAssetName(db, asset_name) {
+        const sql = `
+            SELECT *
+            FROM assets
+            WHERE asset_name = $asset_name;
+        `;
+        const params_obj = {
+            $asset_name: asset_name,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows[0];
         }
     }
+
+    static async getGenesisIssuanceByAssetName(db, asset_name) {
+        // genesis (could be multiple with same block)
+        const sql = `
+            SELECT i.*
+            FROM assets a
+            JOIN issuances i ON (
+                a.asset_name = i.asset AND
+                a.block_index = i.block_index AND
+                i.status = 'valid'
+            )
+            WHERE a.asset_name = $asset_name
+        `;
+        const params_obj = {
+            $asset_name: asset_name,
+        };
+        let rows = await queryDBRows(db, sql, params_obj);
+
+        if (asset_name === 'XCP') {
+            rows = [{
+                asset: 'XCP',
+                asset_longname: null,
+                divisible: true,
+            }];
+        }
+        else if (asset_name === 'BTC') {
+            rows = [{
+                asset: 'BTC',
+                asset_longname: null,
+                divisible: true,
+            }];
+        }
+
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows[0];
+        }
+    }
+
 }
