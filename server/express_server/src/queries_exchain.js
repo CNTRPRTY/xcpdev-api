@@ -126,4 +126,56 @@ export class QueriesExchain {
         }
     }
 
+    static async getGenesisMetadataBalancesByAddress(db, address) {
+        // broken with CIP3 reset assets
+        const sql1 = `
+            SELECT
+                b.*,
+                CAST(b.quantity AS TEXT) AS quantity_text,
+                ad.asset_longname,
+                ad.divisible AS genesis_divisible
+            FROM balances b
+            JOIN (
+                SELECT DISTINCT a.asset_name, a.asset_longname, i.divisible
+                FROM assets a
+                JOIN issuances i ON (
+                    a.asset_name = i.asset AND
+                    a.block_index = i.block_index AND
+                    i.status = 'valid'
+                )
+                WHERE a.asset_name IN (
+                    SELECT bi.asset
+                    FROM balances bi
+                    WHERE bi.address = $address
+                )
+            ) ad ON b.asset = ad.asset_name
+            WHERE b.address = $address;
+        `; // ad => asset with divisiblity
+        const params_obj1 = {
+            $address: address,
+        };
+        const rows1 = await queryDBRows(db, sql1, params_obj1);
+
+        // above query does not include XCP
+        const sql2 = `
+            SELECT
+                *,
+                CAST(quantity AS TEXT) AS quantity_text,
+                NULL AS asset_longname,
+                1 AS genesis_divisible
+            FROM balances
+            WHERE address = $address
+            AND asset = 'XCP';
+        `;
+        const params_obj2 = {
+            $address: address,
+        };
+        const rows2 = await queryDBRows(db, sql2, params_obj2);
+
+        return [
+            ...rows1,
+            ...rows2,
+        ];
+    }
+
 }

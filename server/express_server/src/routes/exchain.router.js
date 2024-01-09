@@ -93,25 +93,32 @@ exchainRouter.get('/asset/:assetName', async (req, res) => {
 });
 
 exchainRouter.get('/balances/:address', async (req, res) => {
+  
+  // TODO (later)
+  // - genesis divisibility (ignoring resets), at least for now
+  // - collections? offchain data, so lowest priority (maybe even irrelevant) for this kind of project... (to be discussed)
+  // - description (latest) will be a heavy query... tbd (we should try to minimize the inefficiencies of xchain (root cause of his decision to fork)), maybe the best solution is to have some custom tables for these...
+  
+  const { address } = req.params;
+  const balances_gm = await QueriesExchain.getGenesisMetadataBalancesByAddress(db, address);
+
   res.status(200).json({
-    address: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
-    data: [
-      {
-        asset: "BOBOCASH",
-        asset_longname: "",
-        collections: [
-          "dank-directory",
-          "rare-bobo"
-        ],
-        description: "https://xcp.dankinfo.art/danks/BOBOCASH.gif",
+    address,
+    data: balances_gm.map(row => {
+      const quantity = quantityWithDivisibility(row.genesis_divisible, BigInt(row.quantity_text));
+      return {
+        asset: row.asset,
+        asset_longname: row.asset_longname,
+        collections: [],
+        description: "",
         estimated_value: {
-          btc: "0.00000017",
-          usd: "0.01",
-          xcp: "0.00147903"
+          btc: "0",
+          usd: "0",
+          xcp: "0"
         },
-        quantity: "1"
-      }
-    ]
+        quantity
+      };
+    })
   });
 });
 
