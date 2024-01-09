@@ -12,6 +12,7 @@ import { quantityWithDivisibility } from '../util.js'
 // xchain.io/api replacement
 export const exchainRouter = Router();
 
+// TODO contains heavy queries... tbd (we should try to minimize the inefficiencies of xchain (root cause of his decision to fork)), maybe the best solution is to have some custom tables for these...
 exchainRouter.get('/address/:address', async (req, res) => {
   const { address } = req.params;
 
