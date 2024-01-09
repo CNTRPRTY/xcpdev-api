@@ -93,6 +93,7 @@ exchainRouter.get('/asset/:assetName', async (req, res) => {
   }
 });
 
+// TODO check XPC / BTC response differences
 exchainRouter.get('/balances/:address', async (req, res) => {
   
   // TODO (later)
