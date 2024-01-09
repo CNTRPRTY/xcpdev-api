@@ -11,32 +11,61 @@ function queryDBRows(db, sql, params_obj) {
 
 
 
+// all quantities are integers as text (no divisibility applied)
 export class QueriesExchain {
 
-    static async getAddressInfo(db, address) {
-        const heldedQuery = `SELECT COUNT(*) AS helded FROM balances WHERE address = ? AND asset != 'XCP';`;
-        const ownedQuery = `SELECT COUNT(*) AS owned FROM issuances WHERE issuer = ?;`;
-        const xcpBalanceQuery = `SELECT quantity FROM balances WHERE address = ? AND asset = 'XCP';`;
-        try {
-            const countHelded = await queryDBRows(db, heldedQuery, [address]);
-            const countOwned = await queryDBRows(db, ownedQuery, [address]);
-            const xcpBalance = await queryDBRows(db, xcpBalanceQuery, [address]);
-            //TODO: calculate estimated_value
-            return {
-                assets: {
-                    held: countHelded[0]?.helded || 0,
-                    owned: countOwned[0]?.owned || 0,
-                },
-                estimated_value: {
-                    btc: "0",
-                    usd: "0",
-                    xcp: "0",
-                },
-                xcp_balance: (xcpBalance[0]?.quantity * 1e-8).toFixed(8) || 0,
-            };
-        } catch (error) {
-            console.error('Internal server error', error);
-            throw error;
+    static async getAddressBalanceAssetsCount(db, address) {
+        // excludes XCP
+        const sql = `
+            SELECT COUNT(*)
+            FROM balances
+            WHERE address = $address
+            AND quantity != 0
+            AND asset != 'XCP';
+        `;
+        const params_obj = {
+            $address: address,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return 0;
+        else { // rows.length === 1
+            return rows[0].count;
+        }
+    }
+
+    static async getIssuerAssetsCount(db, address) {
+        // TODO does not consider issuance transfers
+        const sql = `
+            SELECT COUNT(*)
+            FROM issuances
+            WHERE issuer = $issuer
+            AND status = 'valid'
+            GROUP BY asset_name;
+        `;
+        const params_obj = {
+            $issuer: address,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return 0;
+        else { // rows.length === 1
+            return rows[0].count;
+        }
+    }
+
+    static async getXcpBalance(db, address) {
+        const sql = `
+            SELECT CAST(quantity AS TEXT) AS quantity_text
+            FROM balances
+            WHERE address = $address
+            AND asset = 'XCP';
+        `;
+        const params_obj = {
+            $address: address,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return '0';
+        else { // rows.length === 1
+            return rows[0].quantity_text;
         }
     }
 
