@@ -23,7 +23,7 @@ export class QueriesExchain {
             const xcpBalance = await queryDBRows(db, xcpBalanceQuery, [address]);
             //TODO: calculate estimated_value
             return {
-                assets:{
+                assets: {
                     held: countHelded[0]?.helded || 0,
                     owned: countOwned[0]?.owned || 0,
                 },
@@ -34,6 +34,18 @@ export class QueriesExchain {
                 },
                 xcp_balance: (xcpBalance[0]?.quantity * 1e-8).toFixed(8) || 0,
             };
+        } catch (error) {
+            console.error('Internal server error', error);
+            throw error;
+        }
+    }
+
+    static async getAssetInfo(db, asset) {
+        try {
+            
+            return {
+                asset: asset.toUpperCase(),
+            }
         } catch (error) {
             console.error('Internal server error', error);
             throw error;

@@ -136,10 +136,10 @@ async function updateTransactionsCache() {
 
 app.listen(PORT, () => {
 
-    setInterval(
+    /*setInterval(
         updateMempoolCache,
         updateMempoolCacheSeconds * 1000
-    );
+    );*/
 
     setInterval(
         updateBlocksCache,
