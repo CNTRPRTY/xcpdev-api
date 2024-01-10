@@ -322,7 +322,7 @@ exchainRouter.get('/sends/:identifier', async (req, res) => {
   });
 });
 
-exchainRouter.get('/destructins/:identifier', async (req, res) => {
+exchainRouter.get('/destructions/:identifier', async (req, res) => {
   //NOTE: identifier can be either address or asset or block
   const { identifier } = req.params;
   res.status(200).json({
