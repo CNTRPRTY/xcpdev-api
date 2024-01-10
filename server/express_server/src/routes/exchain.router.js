@@ -38,14 +38,13 @@ exchainRouter.get('/address/:address', async (req, res) => {
 });
 
 // TODO
-// - check XPC / BTC response differences
-// - supply: formatted with divisibility?
-// - type: find all possible values, and implement relevant logic
+// - check XPC / BTC response differences NO difference just in the estimated_value but estructure of response is the same
+// - supply: formatted with divisibility? For the moment KISS and just return the raw quantity
 exchainRouter.get('/asset/:assetName', async (req, res) => {
 
   // TODO (later)
-  // - can req.params.assetName be the longname?
-  // - genesis description, at least for now
+  // - can req.params.assetName be the longname? YES it can be
+  // - genesis description, at least for now 
   // - genesis divisibility (ignoring resets), at least for now
   // - genesis issuer, at least for now
   // - genesis locked, at least for now
@@ -62,7 +61,7 @@ exchainRouter.get('/asset/:assetName', async (req, res) => {
   }
   else {
     const issuance_row = await QueriesExchain.getGenesisIssuanceByAssetName(db, asset_row.asset_name);
-    
+
     res.status(200).json({
       asset: asset_row.asset_name,
       asset_id: asset_row.asset_id,
@@ -88,19 +87,20 @@ exchainRouter.get('/asset/:assetName', async (req, res) => {
       },
       owner: issuance_row.issuer,
       supply: issuance_row.quantity_text,
-      type: "named"
+      type: asset_row.asset_name.startsWith('A') ?
+        (asset_row.asset_longname.length !== 0 ? 'subasset' : 'numeric') : 'asset',
     });
   }
 });
 
 // TODO check XPC / BTC response differences
 exchainRouter.get('/balances/:address', async (req, res) => {
-  
+
   // TODO (later)
   // - genesis divisibility (ignoring resets), at least for now
   // - collections? offchain data, so lowest priority (maybe even irrelevant) for this kind of project... (to be discussed)
   // - description (latest) will be a heavy query... tbd (we should try to minimize the inefficiencies of xchain (root cause of his decision to fork)), maybe the best solution is to have some custom tables for these...
-  
+
   const { address } = req.params;
   const balances_gm = await QueriesExchain.getGenesisMetadataBalancesByAddress(db, address);
 
@@ -123,6 +123,7 @@ exchainRouter.get('/balances/:address', async (req, res) => {
     })
   });
 });
+
 
 exchainRouter.get('/block/:block', async (req, res) => {
   const { block } = req.params;
@@ -318,6 +319,38 @@ exchainRouter.get('/sends/:identifier', async (req, res) => {
       }
     ],
     total: 3
+  });
+});
+
+exchainRouter.get('/destructins/:identifier', async (req, res) => {
+  //NOTE: identifier can be either address or asset or block
+  const { identifier } = req.params;
+  res.status(200).json({
+    asset: "PEPECASH",
+    asset_longname: "",
+    data: [
+      {
+        address: "1BurnPepexxxxxxxxxxxxxxxxxxxAK33R",
+        estimated_value: {
+          btc: "1653.70218485",
+          usd: "3107535.90",
+          xcp: "363020.98938757"
+        },
+        percentage: "30.25174912",
+        quantity: "302517491.15631030"
+      },
+      {
+        address: "1AqUTSTGB6coR5AYcwFFM6nXoULapXqtdL",
+        estimated_value: {
+          btc: "564.41265737",
+          usd: "1060609.71",
+          xcp: "123899.96407927"
+        },
+        percentage: "10.32499701",
+        quantity: "103249970.06606090"
+      },
+    ],
+    total: 2
   });
 });
 
