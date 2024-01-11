@@ -27,3 +27,4 @@ yarn-debug.log*
 yarn-error.log*
 yarn.lock
 
+/server/express_server/src/v9611_b824787_counterparty.db
