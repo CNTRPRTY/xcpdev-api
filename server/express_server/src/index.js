@@ -7,14 +7,19 @@ import { Queries } from './queries.js';
 import { db } from './db.js';
 import { libApiRequest, rootRouter } from './routes/root.router.js';
 import { exchainRouter } from './routes/exchain.router.js';
+import swaggerDocs from './swaggerConfig.js';
 
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use('/', rootRouter);
+// app.use('/', rootRouter);
 app.use('/api/', exchainRouter);
+
+app.get("/", (req, res) => { 
+    res.send("Hello World!");
+})
 
 // cache homepage
 export let cached_mempool = [];
@@ -152,4 +157,6 @@ app.listen(PORT, () => {
     );
 
     console.log(`Example app listening on port ${PORT}`);
+
+    swaggerDocs(app, PORT);
 });

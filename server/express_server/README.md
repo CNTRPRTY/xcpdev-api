@@ -13,3 +13,7 @@ Use this minimal express.js application to read the data from your own Counterpa
 ### Install / Run
 
 The federated node setup must be working... (WIP)
+
+
+## Docs
+The Openapi documentation is automatically generated upon running ```npm start```
