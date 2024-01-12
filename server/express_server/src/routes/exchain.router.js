@@ -156,21 +156,11 @@ exchainRouter.get('/block/:block', async (req, res) => {
 exchainRouter.get('/dispensers/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block
-  switch(getIdentifierType(identifier)){
-    case "block": 
-                  break;
-    
-    case "asset": 
-                  break;
-    
-    case "address": 
-                  break;
-    
-    default: 
-                  break;
-  }
+  let result = await QueriesExchain.getDispenserByIdentifier(db, identifier, getIdentifierType(identifier));
 
   res.status(200).json({
+    data: result
+    /*
     data: [
       {
         asset: "PHOENIXCD",
@@ -188,27 +178,18 @@ exchainRouter.get('/dispensers/:identifier', async (req, res) => {
         tx_index: "2095824"
       },
     ]
+    */
   });
 });
 
 exchainRouter.get('/dispenses/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block or transaction
-  switch(getIdentifierType(identifier)){
-    case "block": 
-                  break;
-    
-    case "asset": 
-                  break;
-    
-    case "address": 
-                  break;
-    
-    default: 
-                  break;
-  }
+  let result = await QueriesExchain.getDispensesByIdentifier(db, identifier, getIdentifierType(identifier));
 
   res.status(200).json({
+    data: result
+    /*
     data: [
       {
         address: "1ChyGpY6qRcCiR9sezmQ97EqBHGGp5gfJF",
@@ -222,6 +203,7 @@ exchainRouter.get('/dispenses/:identifier', async (req, res) => {
         tx_hash: "7801b2518ad08ea124410fef63cc6ba8e54101baea617ce06a14922cfd773a5b"
       },
     ]
+    */
   });
 });
 
@@ -273,21 +255,12 @@ exchainRouter.get('/holders/:asset', async (req, res) => {
 exchainRouter.get('/issuances/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block
-  switch(getIdentifierType(identifier)){
-    case "block": 
-                  break;
-    
-    case "asset": 
-                  break;
-    
-    case "address": 
-                  break;
-    
-    default: 
-                  break;
-  }
+  let result = await QueriesExchain.getIssuancesByIdentifier(db, identifier, getIdentifierType(identifier));
 
   res.status(200).json({
+    data: result
+    /*
+
     data: [
       {
         asset: "A6360128538192758000",
@@ -325,28 +298,18 @@ exchainRouter.get('/issuances/:identifier', async (req, res) => {
       }
     ],
     total: 2
+    */
   });
 });
 
 exchainRouter.get('/sends/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block
-  switch(getIdentifierType(identifier)){
-    case "block": 
-                  break;
-    
-    case "asset": 
-                  break;
-    
-    case "address": 
-                  break;
-    
-    default: 
-                  break;
-  }
+  let result = await QueriesExchain.getSendsByIdentifier(db, identifier, getIdentifierType(identifier));
 
   res.status(200).json({
-    data: [
+    data: result
+    /*[
       {
         asset: "DANKGALLERY",
         asset_longname: "",
@@ -388,27 +351,19 @@ exchainRouter.get('/sends/:identifier', async (req, res) => {
       }
     ],
     total: 3
+    */
   });
 });
 
 exchainRouter.get('/destructions/:identifier', async (req, res) => {
-  //NOTE: identifier can be either address or asset or block
-  switch(getIdentifierType(identifier)){
-    case "block": 
-                  break;
-    
-    case "asset": 
-                  break;
-    
-    case "address": 
-                  break;
-    
-    default: 
-                  break;
-  }
-
   const { identifier } = req.params;
+  //NOTE: identifier can be either address or asset or block
+  let result = await QueriesExchain.getDestructionsByIdentifier(db, identifier, getIdentifierType(identifier));
+
   res.status(200).json({
+    data: result
+    /*
+    /*
     asset: "PEPECASH",
     asset_longname: "",
     data: [
@@ -434,6 +389,7 @@ exchainRouter.get('/destructions/:identifier', async (req, res) => {
       },
     ],
     total: 2
+    */
   });
 });
 
