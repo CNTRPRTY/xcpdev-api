@@ -12,6 +12,19 @@ import { quantityWithDivisibility } from '../util.js'
 // xchain.io/api replacement
 export const exchainRouter = Router();
 
+
+function getIdentifierType(identifier){
+  if(Number(identifier > 0))
+    return "block";
+  else if(identifier[0].match(/[A-Z]/g))
+    return "asset";
+  else if(identifier[0] === "1" || identifier[0] === "3" || identifier[0] === "b")
+    return "address"
+  else
+    return "error"
+}
+
+
 // TODO contains heavy queries... tbd (we should try to minimize the inefficiencies of xchain (root cause of his decision to fork)), maybe the best solution is to have some custom tables for these...
 exchainRouter.get('/address/:address', async (req, res) => {
   const { address } = req.params;
@@ -143,6 +156,20 @@ exchainRouter.get('/block/:block', async (req, res) => {
 exchainRouter.get('/dispensers/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block
+  switch(getIdentifierType(identifier)){
+    case "block": 
+                  break;
+    
+    case "asset": 
+                  break;
+    
+    case "address": 
+                  break;
+    
+    default: 
+                  break;
+  }
+
   res.status(200).json({
     data: [
       {
@@ -167,6 +194,20 @@ exchainRouter.get('/dispensers/:identifier', async (req, res) => {
 exchainRouter.get('/dispenses/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block or transaction
+  switch(getIdentifierType(identifier)){
+    case "block": 
+                  break;
+    
+    case "asset": 
+                  break;
+    
+    case "address": 
+                  break;
+    
+    default: 
+                  break;
+  }
+
   res.status(200).json({
     data: [
       {
@@ -232,6 +273,20 @@ exchainRouter.get('/holders/:asset', async (req, res) => {
 exchainRouter.get('/issuances/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block
+  switch(getIdentifierType(identifier)){
+    case "block": 
+                  break;
+    
+    case "asset": 
+                  break;
+    
+    case "address": 
+                  break;
+    
+    default: 
+                  break;
+  }
+
   res.status(200).json({
     data: [
       {
@@ -276,6 +331,20 @@ exchainRouter.get('/issuances/:identifier', async (req, res) => {
 exchainRouter.get('/sends/:identifier', async (req, res) => {
   const { identifier } = req.params;
   // NOTE: identifier can be either address or asset or block
+  switch(getIdentifierType(identifier)){
+    case "block": 
+                  break;
+    
+    case "asset": 
+                  break;
+    
+    case "address": 
+                  break;
+    
+    default: 
+                  break;
+  }
+
   res.status(200).json({
     data: [
       {
@@ -324,6 +393,20 @@ exchainRouter.get('/sends/:identifier', async (req, res) => {
 
 exchainRouter.get('/destructions/:identifier', async (req, res) => {
   //NOTE: identifier can be either address or asset or block
+  switch(getIdentifierType(identifier)){
+    case "block": 
+                  break;
+    
+    case "asset": 
+                  break;
+    
+    case "address": 
+                  break;
+    
+    default: 
+                  break;
+  }
+
   const { identifier } = req.params;
   res.status(200).json({
     asset: "PEPECASH",
