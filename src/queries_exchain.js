@@ -178,4 +178,158 @@ export class QueriesExchain {
         ];
     }
 
+    static async getDispenserByIdentifier(db, identifier, identifierType) {
+        // TODO: need to formalize returnd datatype formats and test
+        // maybe not force exact xchain returns, but do what makes the most sense
+        var sql = `
+            SELECT *
+            FROM dispensers
+            WHERE 
+        `;
+        switch(identifierType){
+            case "block": sql += `block_index = $identifier;`
+                          break;
+            
+            case "asset": sql += `asset = $identifier;`
+                          break;
+            
+            case "address": sql += `origin = $identifier;`
+                          break;
+            
+            default:      throw new Error("Invalid identifier!")
+          }
+        const params_obj = {
+            $identifier: identifier,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows;
+        }
+    }
+
+    static async getDispensesByIdentifier(db, identifier, identifierType) {
+        // TODO: need to formalize returnd datatype formats and test
+        // maybe not force exact xchain returns, but do what makes the most sense
+        var sql = `
+            SELECT *
+            FROM dispenses
+            WHERE 
+        `;
+        switch(identifierType){
+            case "block": sql += `block_index = $identifier;`
+                          break;
+            
+            case "asset": sql += `asset = $identifier;`
+                          break;
+            
+            case "address": sql += `source = $identifier OR destination = $identifier;`
+                          break;
+            
+            default:      throw new Error("Invalid identifier!")
+          }
+        const params_obj = {
+            $identifier: identifier,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows;
+        }
+    }
+
+    static async getIssuancesByIdentifier(db, identifier, identifierType) {
+        // TODO: need to formalize returnd datatype formats and test
+        // maybe not force exact xchain returns, but do what makes the most sense
+        var sql = `
+            SELECT *
+            FROM issuances
+            WHERE 
+        `;
+        switch(identifierType){
+            case "block": sql += `block_index = $identifier;`
+                          break;
+            
+            case "asset": sql += `asset = $identifier;`
+                          break;
+            
+            case "address": sql += `source = $identifier OR issuer = $identifier;`
+                          break;
+            
+            default:      throw new Error("Invalid identifier!")
+          }
+        const params_obj = {
+            $identifier: identifier,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows;
+        }
+    }
+
+    static async getDestructionsByIdentifier(db, identifier, identifierType) {
+        // TODO: need to formalize returnd datatype formats and test
+        // maybe not force exact xchain returns, but do what makes the most sense
+        var sql = `
+            SELECT *
+            FROM destructions
+            WHERE 
+        `;
+        switch(identifierType){
+            case "block": sql += `block_index = $identifier;`
+                          break;
+            
+            case "asset": sql += `asset = $identifier;`
+                          break;
+            
+            case "address": sql += `source = $identifier`
+                          break;
+            
+            default:      throw new Error("Invalid identifier!")
+          }
+        const params_obj = {
+            $identifier: identifier,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows;
+        }
+    }
+
+    static async getSendsByIdentifier(db, identifier, identifierType) {
+        // TODO: need to formalize returnd datatype formats and test
+        // maybe not force exact xchain returns, but do what makes the most sense
+        var sql = `
+            SELECT *
+            FROM sends
+            WHERE 
+        `;
+        switch(identifierType){
+            case "block": sql += `block_index = $identifier;`
+                          break;
+            
+            case "asset": sql += `asset = $identifier;`
+                          break;
+            
+            case "address": sql += `source = $identifier OR destination = $identifier;`
+                          break;
+            
+            default:      throw new Error("Invalid identifier!")
+          }
+        const params_obj = {
+            $identifier: identifier,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows;
+        }
+    }
+
 }
+/*
+tx_index|tx_hash|                                                       block_index|    source|                     asset|give_quantity|escrow_quantity|satoshirate|status|give_remaining|oracle_address|last_status_tx_hash|origin
+1468609 |4a960783ac0594d25da3d65109e4109e7c3c72b7e7adc0d148f57ebc6909e4aa|600773|1FwkKA9cqpNRFTpVaokdRjT9Xamvebrwcu|XCP|100000000|10000000000|75000|10|0|||1FwkKA9cqpNRFTpVaokdRjT9Xamvebrwcu
+*/
