@@ -181,16 +181,35 @@ export class QueriesExchain {
     static async getDispenserByIdentifier(db, identifier, identifierType) {
         // TODO: need to formalize returnd datatype formats and test
         // maybe not force exact xchain returns, but do what makes the most sense
+    
+        // note: escrow*,give*,status,tx_index and satoshirate returns are ints (xchain uses strings)
+        // also timestamp returns 0 because i dont know where this time comes from
+        // additionally and satoshi_price/rate are the same in xchain prices in btc, im leaving it here as sats
+        // and only returning satoshi_price
         var sql = `
-            SELECT *
-            FROM dispensers
-            WHERE 
+            SELECT 
+                asset,
+                "${identifier.indexOf(".") == -1?"":identifier}" as asset_longname,
+                block_index,
+                escrow_quantity,
+                give_quantity,
+                give_remaining,
+                satoshirate,
+                source,
+                status,
+                tx_hash,
+                tx_index
+            FROM dispensers 
+                WHERE
         `;
+
         switch(identifierType){
             case "block": sql += `block_index = $identifier;`
                           break;
             
-            case "asset": sql += `asset = $identifier;`
+            case "asset": identifier.indexOf(".") == -1 ? 
+                          sql += `asset = $identifier;` :
+                          sql += `asset = (SELECT asset from issuances where asset_longname = $identifier);` ;
                           break;
             
             case "address": sql += `origin = $identifier;`
@@ -212,7 +231,17 @@ export class QueriesExchain {
         // TODO: need to formalize returnd datatype formats and test
         // maybe not force exact xchain returns, but do what makes the most sense
         var sql = `
-            SELECT *
+            SELECT 
+                asset,
+                "${identifier.indexOf(".") == -1?"":identifier}" as asset_longname,
+                block_index,
+                dispense_quantity,
+                source,
+                destination,
+                tx_hash,
+                tx_index,
+                dispense_index,
+                dispenser_tx_hash
             FROM dispenses
             WHERE 
         `;
@@ -220,7 +249,9 @@ export class QueriesExchain {
             case "block": sql += `block_index = $identifier;`
                           break;
             
-            case "asset": sql += `asset = $identifier;`
+            case "asset": identifier.indexOf(".") == -1 ? 
+                            sql += `asset = $identifier;` :
+                            sql += `asset = (SELECT asset from issuances where asset_longname = $identifier);` ;
                           break;
             
             case "address": sql += `source = $identifier OR destination = $identifier;`
@@ -242,7 +273,21 @@ export class QueriesExchain {
         // TODO: need to formalize returnd datatype formats and test
         // maybe not force exact xchain returns, but do what makes the most sense
         var sql = `
-            SELECT *
+            SELECT 
+                asset,
+                "${identifier.indexOf(".") == -1?"":identifier}" as asset_longname,
+                block_index,
+                description,
+                divisible,
+                fee_paid,
+                issuer,
+                source,
+                locked,
+                quantity,
+                status,
+                tx_hash,
+                tx_index,
+                transfer
             FROM issuances
             WHERE 
         `;
@@ -250,7 +295,9 @@ export class QueriesExchain {
             case "block": sql += `block_index = $identifier;`
                           break;
             
-            case "asset": sql += `asset = $identifier;`
+            case "asset": identifier.indexOf(".") == -1 ? 
+                            sql += `asset = $identifier;` :
+                            sql += `asset_longname = $identifier;` ;
                           break;
             
             case "address": sql += `source = $identifier OR issuer = $identifier;`
@@ -272,7 +319,16 @@ export class QueriesExchain {
         // TODO: need to formalize returnd datatype formats and test
         // maybe not force exact xchain returns, but do what makes the most sense
         var sql = `
-            SELECT *
+            SELECT
+                asset,
+                "${identifier.indexOf(".") == -1?"":identifier}" as asset_longname,
+                block_index,
+                quantity,
+                source,
+                status,
+                tx_index,
+                tx_hash,
+                tag
             FROM destructions
             WHERE 
         `;
@@ -280,7 +336,9 @@ export class QueriesExchain {
             case "block": sql += `block_index = $identifier;`
                           break;
             
-            case "asset": sql += `asset = $identifier;`
+            case "asset": identifier.indexOf(".") == -1 ? 
+                            sql += `asset = $identifier;` :
+                            sql += `asset = (SELECT asset from issuances where asset_longname = $identifier);` ;
                           break;
             
             case "address": sql += `source = $identifier`
@@ -302,7 +360,17 @@ export class QueriesExchain {
         // TODO: need to formalize returnd datatype formats and test
         // maybe not force exact xchain returns, but do what makes the most sense
         var sql = `
-            SELECT *
+            SELECT
+                asset,
+                "${identifier.indexOf(".") == -1?"":identifier}" as asset_longname,
+                block_index,
+                quantity,
+                source,
+                destination,
+                status,
+                tx_index,
+                tx_hash,
+                memo
             FROM sends
             WHERE 
         `;
@@ -310,7 +378,9 @@ export class QueriesExchain {
             case "block": sql += `block_index = $identifier;`
                           break;
             
-            case "asset": sql += `asset = $identifier;`
+            case "asset": identifier.indexOf(".") == -1 ? 
+                            sql += `asset = $identifier;` :
+                            sql += `asset = (SELECT asset from issuances where asset_longname = $identifier);` ;
                           break;
             
             case "address": sql += `source = $identifier OR destination = $identifier;`
