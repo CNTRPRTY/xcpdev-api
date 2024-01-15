@@ -9,6 +9,15 @@ import { cached_blocks, cached_mempool, cached_transactions } from "../index.js"
 export const rootRouter = Router();
 
 
+rootRouter.get('/', async (req, res) => {
+  res.status(200).json({
+    node: {
+      BITCOIN_VERSION,
+      COUNTERPARTY_VERSION,
+    },
+  });
+});
+
 rootRouter.get('/tip', async (req, res) => {
   const tip_blocks_row = await Queries.getBlocksRowTip(db);
   res.status(200).json({
