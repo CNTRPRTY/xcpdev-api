@@ -1,4 +1,6 @@
 {
+    "name": "xcpdev-api",
+    "version": "2.0.0",
     "type": "module",
     "scripts": {
         "start": "node src/index.js",

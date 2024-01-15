@@ -1,4 +1,6 @@
-# xcp.dev Development Server
+# xcpdev-api (WIP)
+
+## (Previously) xcp.dev Development Server
 
 This simple nodejs api server provides all of the web app's functionality.
 
