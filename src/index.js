@@ -14,7 +14,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/', rootRouter);
-app.use('/exchain/', exchainRouter);
+app.use('/api/', exchainRouter);
 
 // cache homepage
 export let cached_mempool = [];
@@ -136,10 +136,10 @@ async function updateTransactionsCache() {
 
 app.listen(PORT, () => {
 
-    setInterval(
+    /*setInterval(
         updateMempoolCache,
         updateMempoolCacheSeconds * 1000
-    );
+    );*/
 
     setInterval(
         updateBlocksCache,

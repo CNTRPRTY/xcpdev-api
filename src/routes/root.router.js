@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { db } from "../db.js";
 import { Queries } from "../queries.js";
+import { fetch } from '../util.js'
 import { BITCOIN_VERSION, COUNTERPARTY_VERSION } from "../config.js";
 import { cached_blocks, cached_mempool, cached_transactions } from "../index.js";
 
@@ -383,8 +384,6 @@ rootRouter.get('/messages/:messageIndex', async (req, res) => {
     });
   }
 }); // TESTED
-
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 export async function libApiRequest(method, params = null) {
   const url = `http://0.0.0.0:4000/api/`; // trailing slash required!
