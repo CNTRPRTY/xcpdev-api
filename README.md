@@ -1,12 +1,15 @@
-# xcp.dev
+# xcp.dev Development Server
 
-## Libre Counterparty Bitcoin Data Explorer
+This simple nodejs api server provides all of the web app's functionality.
 
-THIS IS ALPHA SOFTWARE, but is live at https://www.xcp.dev.
+The main goal and purpose of this software is to educate about Counterparty Bitcoin development.
 
-This is an open source Counterparty data explorer server + client application. It requires a fednode to run the server... (WIP)
+(This is not a full production environment setup.)
 
----
----
+## Read (only)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Use this minimal express.js application to read the data from your own Counterparty federated node setup.
+
+### Install / Run
+
+The federated node setup must be working... (WIP)
