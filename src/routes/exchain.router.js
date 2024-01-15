@@ -223,7 +223,13 @@ exchainRouter.get('/tx/:tx_hash', async (req, res) => {
 
 exchainRouter.get('/holders/:asset', async (req, res) => {
   const { asset } = req.params;
+  // Note: this returns the user addresses and the quanties, no value/pct information
+
+  let result = await QueriesExchain.getHoldersByAsset(db, asset);
+
   res.status(200).json({
+    data: result
+    /*
     asset: "PEPECASH",
     asset_longname: "",
     data: [
@@ -249,6 +255,7 @@ exchainRouter.get('/holders/:asset', async (req, res) => {
       },
     ],
     total: 2
+    */
   });
 });
 

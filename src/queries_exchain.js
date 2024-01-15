@@ -398,6 +398,30 @@ export class QueriesExchain {
         }
     }
 
+    static async getHoldersByAsset(db, asset) {
+        // TODO: need to formalize returnd datatype formats and test
+        // maybe not force exact xchain returns, but do what makes the most sense
+        var sql = `
+            SELECT
+                address,
+                quantity
+            FROM balances
+            WHERE quantity > 0 AND 
+        `;
+        asset.indexOf(".") == -1 ? 
+            sql += `asset = $asset;` :
+            sql += `asset = (SELECT asset from issuances where asset_longname = $asset);` ;
+
+        const params_obj = {
+            $asset: asset,
+        };
+        const rows = await queryDBRows(db, sql, params_obj);
+        if (rows.length === 0) return null;
+        else { // rows.length === 1
+            return rows;
+        }
+    }
+
 }
 /*
 tx_index|tx_hash|                                                       block_index|    source|                     asset|give_quantity|escrow_quantity|satoshirate|status|give_remaining|oracle_address|last_status_tx_hash|origin
