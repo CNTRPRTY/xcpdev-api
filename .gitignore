@@ -28,4 +28,6 @@ yarn.lock
 
 package-lock.json
 
+src/swagger-output.json
+
 src/v9611_b824787_counterparty.db
