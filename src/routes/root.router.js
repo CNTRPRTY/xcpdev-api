@@ -148,6 +148,23 @@ rootRouter.get('/block/:blockIndex', async (req, res) => {
   }
 }); // TESTED
 
+rootRouter.get('/blockhash/:blockHash', async (req, res) => {
+  // will just return the block_index for a subsequent client /block/:blockIndex request
+  const block_hash = req.params.blockHash;
+  const block_row = await Queries.getBlocksRowByBlockHash(db, block_hash);
+  if (!block_row) {
+    res.status(404).json({
+      error: '404 Not Found'
+    });
+  }
+  else {
+    res.status(200).json({
+      block_row,
+    });
+  }
+});
+
+// TODO delete
 rootRouter.get('/address/:address', async (req, res) => {
   const address = req.params.address;
   const tables = {};
@@ -164,6 +181,33 @@ rootRouter.get('/address/:address', async (req, res) => {
     tables,
   });
 }); // TESTED BUT RETURNS empty arrays not sure why
+
+rootRouter.get('/address/:address/dispensers', async (req, res) => {
+  const address = req.params.address;
+  // const dispensers = {}; // changed to direct lists...
+  const dispensers_open = await Queries.getOpenDispensersRowsByAddress(db, address);
+  const dispensers_closed = await Queries.getClosedDispensersRowsByAddress(db, address);
+  res.status(200).json({
+    dispensers_open,
+    dispensers_closed,
+  });
+});
+
+rootRouter.get('/address/:address/broadcasts', async (req, res) => {
+  const address = req.params.address;
+  const broadcasts = await Queries.getBroadcastsRowsByAddress(db, address);
+  res.status(200).json({
+    broadcasts,
+  });
+});
+
+rootRouter.get('/address/:address/issuances', async (req, res) => {
+  const address = req.params.address;
+  const issuances = await Queries.getIssuancesRowsByAssetsByIssuer(db, address);
+  res.status(200).json({
+    issuances,
+  });
+});
 
 rootRouter.get('/address/:address/balances', async (req, res) => {
   const address = req.params.address;
