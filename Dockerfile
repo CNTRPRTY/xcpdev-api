@@ -19,6 +19,21 @@ ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 RUN node --version
 RUN npm --version
 
+# include spa frontend
+
+WORKDIR /
+RUN git clone https://github.com/CNTRPRTY/xcpdev-spa.git
+WORKDIR /xcpdev-spa
+## install and build
+RUN npm install
+RUN npx tailwindcss -i ./src/input.css -o ./src/output.css
+RUN npm run build
+## move build to expected spa_build folder
+WORKDIR /
+COPY ./xcpdev-spa/build /spa_build
+## cleanup
+RUN rm -rf xcpdev-spa
+
 # copy app files, install and run
 
 RUN mkdir /app
