@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 
 # nodejs nvm install (https://stackoverflow.com/a/57546198)
 
-RUN apt-get update && apt-get install -y wget
+RUN apt-get update && apt-get install -y wget git
 
 ENV HOME /root
 WORKDIR /
@@ -22,6 +22,8 @@ RUN npm --version
 # include spa frontend
 
 WORKDIR /
+RUN mkdir /app
+
 RUN git clone https://github.com/CNTRPRTY/xcpdev-spa.git
 WORKDIR /xcpdev-spa
 ## install and build
@@ -30,13 +32,12 @@ RUN npx tailwindcss -i ./src/input.css -o ./src/output.css
 RUN npm run build
 ## move build to expected spa_build folder
 WORKDIR /
-COPY ./xcpdev-spa/build /spa_build
+RUN mv ./xcpdev-spa/build ./app/spa_build
 ## cleanup
-RUN rm -rf xcpdev-spa
+RUN rm -rf ./xcpdev-spa
 
 # copy app files, install and run
 
-RUN mkdir /app
 COPY . /app
 WORKDIR /app
 
