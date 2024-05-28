@@ -1311,6 +1311,7 @@ apiRouter.post('/lib_api_proxy', async (req, res) => {
     catch (err) {
         console.log(`lib_api_proxy error:`);
         console.log(err);
+        console.log(`req.body: ${JSON.stringify(req.body)}`);
         res.status(500).json({
             error: '500 error!',
         });
