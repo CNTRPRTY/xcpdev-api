@@ -125,10 +125,19 @@ apiRouter.get('/tip', async (req, res) => {
 
 async function updateMempoolCache() {
     const start = new Date().getTime();
-    const mempool = await Queries.getMempoolRows(db);
+    const lib_response = await libApiRequest('get_memmempool', {});
     const end = new Date().getTime();
-    cached_mempool = mempool;
-    cached_mempool_timems = end - start;
+    if (lib_response.result) {
+        cached_mempool = lib_response.result.result.cached_response;
+        // cached_mempool = lib_response.result.cached_response;
+        cached_mempool_timems = end - start;
+    }
+
+    // const start = new Date().getTime();
+    // const mempool = await Queries.getMempoolRows(db);
+    // const end = new Date().getTime();
+    // cached_mempool = mempool;
+    // cached_mempool_timems = end - start;
 }
 
 async function updateBlocksCache() {
