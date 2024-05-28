@@ -1267,7 +1267,8 @@ async function libApiRequest(method, params = null) {
     const options = {
         "method": "POST",
         "headers": {
-            "Authorization": "Basic " + Buffer.from(`${username}:${password}`).toString("base64")
+            "Authorization": "Basic " + Buffer.from(`${username}:${password}`).toString("base64"),
+            "Content-Type": "application/json",
         }
     };
     const body = {
