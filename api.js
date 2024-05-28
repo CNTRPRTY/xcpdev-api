@@ -7,10 +7,6 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 
 const { Queries } = require('./queries');
 
-// read only
-const DB_PATH = '/data/counterparty/counterparty.db';
-const db = sqlite3(DB_PATH, { readonly: true });
-
 const client = new Client({
     host: 'bitcoind',
     network: 'mainnet',
@@ -18,8 +14,24 @@ const client = new Client({
     password: 'rpc'
 });
 
+// only connect to counterparty db if bitcoin is synced
+
+let db;
+Promise.resolve()
+    .then(() => {
+        return client.command([
+            { method: 'getblockchaininfo', parameters: [] },
+        ]);
+    })
+    .then((results) => {
+        if (!results[0].initialblockdownload) {
+            const DB_PATH = '/data/counterparty/counterparty.db';
+            db = sqlite3(DB_PATH, { readonly: true }); // read only!
+        }
+    });
+
 const BITCOIN_VERSION = '0.21.1';
-const COUNTERPARTY_VERSION = '10.1.1.CNTRPRTY';
+const COUNTERPARTY_VERSION = '10.1.2.CNTRPRTY';
 
 const apiRouter = Router();
 
@@ -108,7 +120,14 @@ apiRouter.get('/', async (req, res) => {
     // });
 });
 
+function serviceUnavailable(res) {
+    res.status(503).json({
+        error: '503 Service Unavailable',
+    });
+}
+
 apiRouter.get('/tip', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const start = new Date().getTime();
     const tip_blocks_row = await Queries.getBlocksRowTip(db);
     const end = new Date().getTime();
@@ -206,9 +225,11 @@ let cached_transactions = [];
 let cached_transactions_timems = null;
 
 async function updateMinuteCache() {
-    await updateMempoolCache();
-    await updateBlocksCache();
-    await updateTransactionsCache();
+    if (db) {
+        await updateMempoolCache();
+        await updateBlocksCache();
+        await updateTransactionsCache();
+    }
 }
 
 ///////////////////////////////////////
@@ -216,6 +237,7 @@ async function updateMinuteCache() {
 
 
 apiRouter.get('/mempool', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     res.status(200).json({
         mempool: cached_mempool,
         query_timems: cached_mempool_timems,
@@ -224,6 +246,7 @@ apiRouter.get('/mempool', async (req, res) => {
 
 apiRouter.get('/blocks/:blockIndex', async (req, res) => {
     // app.get('/blocks/:blockTime', async (req, res) => { // would be cool but is not indexed... (also good for clear difference to /block/blockIndex)
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -293,6 +316,7 @@ apiRouter.get('/blocks/:blockIndex', async (req, res) => {
 });
 
 apiRouter.get('/blocks', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     res.status(200).json({
         blocks: cached_blocks,
         query1_timems: cached_blocks_query1_timems,
@@ -302,6 +326,7 @@ apiRouter.get('/blocks', async (req, res) => {
 });
 
 apiRouter.get('/block/:blockIndex/transactions', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const block_index = req.params.blockIndex;
     const start = new Date().getTime();
     const transactions = await Queries.getTransactionsRowsByBlock(db, block_index);
@@ -313,6 +338,7 @@ apiRouter.get('/block/:blockIndex/transactions', async (req, res) => {
 });
 
 apiRouter.get('/block/:blockIndex/messages', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const block_index = req.params.blockIndex;
     const start = new Date().getTime();
     const messages = await Queries.getMessagesRowsByBlock(db, block_index);
@@ -324,6 +350,7 @@ apiRouter.get('/block/:blockIndex/messages', async (req, res) => {
 });
 
 apiRouter.get('/block/:blockIndex', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -387,6 +414,7 @@ apiRouter.get('/block/:blockIndex', async (req, res) => {
 });
 
 apiRouter.get('/blockhash/:blockHash', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const block_hash = req.params.blockHash;
     const start = new Date().getTime();
     const block_row = await Queries.getBlocksRowByBlockHash(db, block_hash);
@@ -405,6 +433,7 @@ apiRouter.get('/blockhash/:blockHash', async (req, res) => {
 });
 
 apiRouter.get('/transactions/dispensers/:txHash', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -457,6 +486,7 @@ apiRouter.get('/transactions/dispensers/:txHash', async (req, res) => {
 });
 
 apiRouter.get('/transactions/orders/:txHash', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -529,6 +559,7 @@ apiRouter.get('/transactions/orders/:txHash', async (req, res) => {
 });
 
 apiRouter.get('/transactions/:txIndex', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let tx_index;
     try {
         tx_index = Number(req.params.txIndex);
@@ -560,6 +591,7 @@ apiRouter.get('/transactions/:txIndex', async (req, res) => {
 });
 
 apiRouter.get('/transactions', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     res.status(200).json({
         transactions: cached_transactions,
         query_timems: cached_transactions_timems,
@@ -567,6 +599,7 @@ apiRouter.get('/transactions', async (req, res) => {
 });
 
 apiRouter.get('/txindex/:txIndex', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const tx_index = req.params.txIndex;
     const start = new Date().getTime();
     const transaction_row = await Queries.getTransactionsRowByTxIndex(db, tx_index);
@@ -585,6 +618,7 @@ apiRouter.get('/txindex/:txIndex', async (req, res) => {
 });
 
 apiRouter.get('/tx/:txHash', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
     let transaction_timems;
@@ -624,6 +658,7 @@ apiRouter.get('/tx/:txHash', async (req, res) => {
 });
 
 apiRouter.get('/address/:address/dispensers/open', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const address = req.params.address;
     const start = new Date().getTime();
     const dispensers_open = await Queries.getOpenDispensersRowsByAddress(db, address);
@@ -635,6 +670,7 @@ apiRouter.get('/address/:address/dispensers/open', async (req, res) => {
 });
 
 apiRouter.get('/address/:address/dispensers/closed', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const address = req.params.address;
     const start = new Date().getTime();
     const dispensers_closed = await Queries.getClosedDispensersRowsByAddress(db, address);
@@ -646,6 +682,7 @@ apiRouter.get('/address/:address/dispensers/closed', async (req, res) => {
 });
 
 apiRouter.get('/address/:address/broadcasts', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const address = req.params.address;
     const start = new Date().getTime();
     const broadcasts = await Queries.getBroadcastsRowsByAddress(db, address);
@@ -657,6 +694,7 @@ apiRouter.get('/address/:address/broadcasts', async (req, res) => {
 });
 
 apiRouter.get('/address/:address/issuances', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const address = req.params.address;
     const start = new Date().getTime();
     const issuances = await Queries.getIssuancesRowsByAssetsByIssuer(db, address);
@@ -668,6 +706,7 @@ apiRouter.get('/address/:address/issuances', async (req, res) => {
 });
 
 apiRouter.get('/address/:address/balances', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
     let query1_timems;
@@ -736,6 +775,7 @@ apiRouter.get('/address/:address/balances', async (req, res) => {
 });
 
 apiRouter.get('/assets/:fromString', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -765,6 +805,7 @@ apiRouter.get('/assets/:fromString', async (req, res) => {
 
 // app.get('/asset/:assetName/dispensers/open', async (req, res) => {
 apiRouter.get('/asset/:assetName/escrows/dispensers', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -790,6 +831,7 @@ apiRouter.get('/asset/:assetName/escrows/dispensers', async (req, res) => {
 
 // app.get('/asset/:assetName/orders/give', async (req, res) => {
 apiRouter.get('/asset/:assetName/escrows/orders', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -815,6 +857,7 @@ apiRouter.get('/asset/:assetName/escrows/orders', async (req, res) => {
 
 // app.get('/asset/:assetName/orders/get', async (req, res) => {
 apiRouter.get('/asset/:assetName/exchanges', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -839,6 +882,7 @@ apiRouter.get('/asset/:assetName/exchanges', async (req, res) => {
 });
 
 apiRouter.get('/asset/:assetName/issuances', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -863,6 +907,7 @@ apiRouter.get('/asset/:assetName/issuances', async (req, res) => {
 });
 
 apiRouter.get('/asset/:assetName/destructions', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -887,6 +932,7 @@ apiRouter.get('/asset/:assetName/destructions', async (req, res) => {
 });
 
 apiRouter.get('/asset/:assetName/balances', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
 
@@ -918,6 +964,7 @@ apiRouter.get('/asset/:assetName/balances', async (req, res) => {
 });
 
 apiRouter.get('/asset/:assetName/subassets', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const asset_name = req.params.assetName;
     const start = new Date().getTime();
     const assets = await Queries.getAssetsRowsForAssetLongname(db, asset_name);
@@ -929,6 +976,7 @@ apiRouter.get('/asset/:assetName/subassets', async (req, res) => {
 });
 
 apiRouter.get('/asset/:assetName', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const asset_name = req.params.assetName;
     const start = new Date().getTime();
     const asset_row = await Queries.getAssetsRowByAssetName(db, asset_name);
@@ -947,6 +995,7 @@ apiRouter.get('/asset/:assetName', async (req, res) => {
 });
 
 apiRouter.get('/subasset/:assetLongname', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     const asset_longname = req.params.assetLongname;
     const start = new Date().getTime();
     const asset_row = await Queries.getAssetsRowByAssetLongname(db, asset_longname);
@@ -1006,6 +1055,7 @@ const TABLES = [
 ];
 
 async function getYearsMessages() {
+    if (!db) return serviceUnavailable(res);
     const tip_blocks_row = await Queries.getBlocksRowTip(db);
     const tip_blocks_row_year = Number(timeIsoFormat(tip_blocks_row.block_time).split('-')[0]);
 
@@ -1015,7 +1065,7 @@ async function getYearsMessages() {
     const years_messages = [];
     for (const year of years) {
         const yearDate = new Date(`${year}-01-01T00:00:00Z`);
-        const yearTime = yearDate.getTime()/1000;
+        const yearTime = yearDate.getTime() / 1000;
         const start = new Date().getTime();
 
         const first_message = await Queries.getBlockRowFirstAfterTimeMessages(db, yearTime);
@@ -1033,6 +1083,7 @@ async function getYearsMessages() {
 }
 
 async function getYearsMessagesCategory(category) {
+    if (!db) return serviceUnavailable(res);
     const tip_blocks_row = await Queries.getBlocksRowTip(db);
     const tip_blocks_row_year = Number(timeIsoFormat(tip_blocks_row.block_time).split('-')[0]);
 
@@ -1042,7 +1093,7 @@ async function getYearsMessagesCategory(category) {
     const years_messages = [];
     for (const year of years) {
         const yearDate = new Date(`${year}-01-01T00:00:00Z`);
-        const yearTime = yearDate.getTime()/1000;
+        const yearTime = yearDate.getTime() / 1000;
         const start = new Date().getTime();
 
         const first_message = await Queries.getBlockRowFirstAfterTimeCategoryMessages(db, yearTime, category);
@@ -1064,15 +1115,17 @@ let cached_years_messages = [];
 let cached_years_messages_category = {};
 
 async function updateHourCache() {
-    cached_years_messages = await getYearsMessages();
+    if (db) {
+        cached_years_messages = await getYearsMessages();
 
-    for (const table of TABLES) {
-        cached_years_messages_category[table] = await getYearsMessagesCategory(table);
+        for (const table of TABLES) {
+            cached_years_messages_category[table] = await getYearsMessagesCategory(table);
+        }
     }
 }
 
 apiRouter.get('/years/messages/:category', async (req, res) => {
-
+    if (!db) return serviceUnavailable(res);
     const category = req.params.category;
 
     if (!(category in cached_years_messages_category)) {
@@ -1084,7 +1137,7 @@ apiRouter.get('/years/messages/:category', async (req, res) => {
 
     const years_messages = cached_years_messages_category[category];
     // const years_messages = await getYearsMessagesCategory(category);
-    
+
     res.status(200).json({
         category,
         years_messages,
@@ -1092,6 +1145,7 @@ apiRouter.get('/years/messages/:category', async (req, res) => {
 });
 
 apiRouter.get('/years/messages', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     res.status(200).json({
         years_messages: cached_years_messages,
         // years_messages: await getYearsMessages(),
@@ -1103,6 +1157,7 @@ apiRouter.get('/years/messages', async (req, res) => {
 
 
 apiRouter.get('/messages/:messageIndex/category/:category', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let message_index;
     try {
         message_index = Number(req.params.messageIndex);
@@ -1129,7 +1184,7 @@ apiRouter.get('/messages/:messageIndex/category/:category', async (req, res) => 
 
     const from_index_adjusted = messages.length ? messages[0].message_index : message_index;
     const to_index = messages.length ? messages[messages.length - 1].message_index : message_index;
-    
+
     // cleanup:
 
     // first remove years without message results
@@ -1145,7 +1200,7 @@ apiRouter.get('/messages/:messageIndex/category/:category', async (req, res) => 
             ];
         }
     });
-    
+
     // then removing early repeated data years (quirk of query used)
     const years = [];
     for (let i = 0; i < _years.length; i++) {
@@ -1180,6 +1235,7 @@ apiRouter.get('/messages/:messageIndex/category/:category', async (req, res) => 
 });
 
 apiRouter.get('/messages/:messageIndex', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let message_index;
     try {
         message_index = Number(req.params.messageIndex);
@@ -1198,11 +1254,11 @@ apiRouter.get('/messages/:messageIndex', async (req, res) => {
     const start = new Date().getTime();
     const messages = await Queries.getMessagesFromMessageIndexToMessageIndex(db, message_index, to_index);
     const end = new Date().getTime();
-    
+
     const years = cached_years_messages.map((row) => {
         return [`${row.year}`, row.message_row.message_index];
     });
-    
+
     res.status(200).json({
         node: {
             BITCOIN_VERSION,
@@ -1219,6 +1275,7 @@ apiRouter.get('/messages/:messageIndex', async (req, res) => {
 
 // non-standard on purpose
 apiRouter.get('/blocks_messages_range/:startBlockIndex/:endBlockIndex', async (req, res) => {
+    if (!db) return serviceUnavailable(res);
     let start;
     let end;
     let query1_timems;
