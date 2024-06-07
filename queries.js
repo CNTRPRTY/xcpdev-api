@@ -486,57 +486,6 @@ class Queries {
         };
         return queryDBRows(db, sql, params_obj);
     }
-    // TODO ignoring XCP for now
-    static async getBalancesRowsByAssetNameOLD(db, asset_name) {
-        // static async getBalancesRowsByAssetName(db, asset_name) {
-        // broken with v9.61 reset assets...
-
-        // v10
-        const sql = `
-            SELECT
-                MAX(b.rowid) as _rowid,
-                b.*,
-                CAST(b.quantity AS TEXT) AS quantity_text,
-                ad.asset_longname,
-                ad.divisible
-            FROM balances b
-            JOIN (
-                SELECT DISTINCT a.asset_name, a.asset_longname, i.divisible
-                FROM assets a
-                JOIN issuances i ON (
-                    a.asset_name = i.asset AND
-                    a.block_index = i.block_index AND
-                    i.status = 'valid'
-                )
-                WHERE a.asset_name = $asset_name
-            ) ad ON b.asset = ad.asset_name
-            GROUP BY b.address;
-        `; // ad => asset with divisiblity
-
-        // v9
-        // const sql = `
-        //     SELECT b.*, CAST(b.quantity AS TEXT) AS quantity_text, ad.asset_longname, ad.divisible
-        //     FROM balances b
-        //     JOIN (
-        //         SELECT DISTINCT a.asset_name, a.asset_longname, i.divisible
-        //         FROM assets a
-        //         JOIN issuances i ON (
-        //             a.asset_name = i.asset AND
-        //             a.block_index = i.block_index AND
-        //             i.status = 'valid'
-        //         )
-        //         WHERE a.asset_name = $asset_name
-        //     ) ad ON b.asset = ad.asset_name;
-        // `; // ad => asset with divisiblity
-
-        // 'AS TEXT' bigint handling references
-        // https://stackoverflow.com/a/26820991
-        // https://github.com/TryGhost/node-sqlite3/issues/922#issuecomment-1179480916
-        const params_obj = {
-            asset_name,
-        };
-        return queryDBRows(db, sql, params_obj);
-    }
 
     static async getBalancesRowsByAddressWithoutXcp(db, address) {
         // broken with v9.61 reset assets
