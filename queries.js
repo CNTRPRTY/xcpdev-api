@@ -471,8 +471,20 @@ class Queries {
                 CAST(quantity AS TEXT) AS quantity_text
             FROM balances
             WHERE asset = $asset_name
-            GROUP BY address;
+            GROUP BY address
+            ORDER BY _rowid DESC;
         `;
+
+        // // v10
+        // const sql = `
+        //     SELECT
+        //         MAX(rowid) as _rowid,
+        //         *,
+        //         CAST(quantity AS TEXT) AS quantity_text
+        //     FROM balances
+        //     WHERE asset = $asset_name
+        //     GROUP BY address;
+        // `;
 
         // v9
         // const sql = `
@@ -508,14 +520,42 @@ class Queries {
                     i.status = 'valid'
                 )
                 WHERE a.asset_name IN (
-                    SELECT bi.asset
+                    SELECT DISTINCT bi.asset
                     FROM balances bi
                     WHERE bi.address = $address
                 )
             ) ad ON b.asset = ad.asset_name
             WHERE b.address = $address
-            GROUP BY b.asset;
+            GROUP BY b.asset
+            ORDER BY _rowid DESC;
         `; // ad => asset with divisiblity
+
+        // // v10
+        // const sql = `
+        //     SELECT
+        //         MAX(b.rowid) AS _rowid,
+        //         b.*,
+        //         CAST(b.quantity AS TEXT) AS quantity_text,
+        //         ad.asset_longname,
+        //         ad.divisible
+        //     FROM balances b
+        //     JOIN (
+        //         SELECT DISTINCT a.asset_name, a.asset_longname, i.divisible
+        //         FROM assets a
+        //         JOIN issuances i ON (
+        //             a.asset_name = i.asset AND
+        //             a.block_index = i.block_index AND
+        //             i.status = 'valid'
+        //         )
+        //         WHERE a.asset_name IN (
+        //             SELECT bi.asset
+        //             FROM balances bi
+        //             WHERE bi.address = $address
+        //         )
+        //     ) ad ON b.asset = ad.asset_name
+        //     WHERE b.address = $address
+        //     GROUP BY b.asset;
+        // `; // ad => asset with divisiblity
 
         // v9
         // const sql = `
@@ -554,8 +594,20 @@ class Queries {
             FROM balances
             WHERE address = $address
             AND asset = $asset
-            GROUP BY asset;
+            GROUP BY asset
+            ORDER BY _rowid DESC;
         `;
+        // // v10
+        // const sql = `
+        //     SELECT
+        //         MAX(rowid) AS _rowid,
+        //         *,
+        //         CAST(quantity AS TEXT) AS quantity_text
+        //     FROM balances
+        //     WHERE address = $address
+        //     AND asset = $asset
+        //     GROUP BY asset;
+        // `;
 
         // v9
         // const sql = `
@@ -830,10 +882,31 @@ class Queries {
                     ON o.tx_index_block = b.block_index
                 WHERE o.give_asset = $asset_name
                 GROUP BY o.tx_hash
+                ORDER BY _rowid DESC
             ) AS nup
             WHERE status = $status
             ORDER BY tx_index ASC;
         `; // nup => no updates
+
+        // // v10.CNTRPRTY tx_index_block
+        // const sql = `
+        //     SELECT *
+        //     FROM (
+        //         SELECT
+        //             MAX(o.rowid) AS _rowid,
+        //             o.*,
+        //             CAST(o.give_remaining AS TEXT) AS give_remaining_text,
+        //             CAST(o.get_remaining AS TEXT) AS get_remaining_text,
+        //             b.block_time
+        //         FROM orders o
+        //         JOIN blocks b
+        //             ON o.tx_index_block = b.block_index
+        //         WHERE o.give_asset = $asset_name
+        //         GROUP BY o.tx_hash
+        //     ) AS nup
+        //     WHERE status = $status
+        //     ORDER BY tx_index ASC;
+        // `; // nup => no updates
 
         // // v10
         // const sql = `
@@ -901,10 +974,32 @@ class Queries {
                     ON d.tx_index_block = b.block_index
                 WHERE d.asset = $asset_name
                 GROUP BY d.tx_hash
+                ORDER BY _rowid DESC
             ) AS nup
             WHERE status != $status
             ORDER BY tx_index ASC;
         `; // nup => no updates
+
+        // // v10.CNTRPRTY tx_index_block
+        // const sql = `
+        //     SELECT *
+        //     FROM (
+        //         SELECT
+        //             MAX(d.rowid) AS _rowid,
+        //             d.*,
+        //             CAST(d.satoshirate AS TEXT) AS satoshirate_text,
+        //             CAST(d.give_quantity AS TEXT) AS give_quantity_text,
+        //             CAST(d.give_remaining AS TEXT) AS give_remaining_text,
+        //             b.block_time
+        //         FROM dispensers d
+        //         JOIN blocks b
+        //             ON d.tx_index_block = b.block_index
+        //         WHERE d.asset = $asset_name
+        //         GROUP BY d.tx_hash
+        //     ) AS nup
+        //     WHERE status != $status
+        //     ORDER BY tx_index ASC;
+        // `; // nup => no updates
 
         // // v10
         // const sql = `
@@ -973,10 +1068,31 @@ class Queries {
                     ON d.block_index = b.block_index
                 WHERE d.source = $address
                 GROUP BY d.tx_hash
+                ORDER BY _rowid DESC
             ) AS nup
             WHERE status != $status
             ORDER BY tx_index ASC;
         `; // nup => no updates
+
+        // // v10
+        // const sql = `
+        //     SELECT *
+        //     FROM (
+        //         SELECT
+        //             MAX(d.rowid) AS _rowid,
+        //             d.*,
+        //             CAST(d.satoshirate AS TEXT) AS satoshirate_text,
+        //             CAST(d.give_quantity AS TEXT) AS give_quantity_text,
+        //             b.block_time
+        //         FROM dispensers d
+        //         JOIN blocks b
+        //             ON d.block_index = b.block_index
+        //         WHERE d.source = $address
+        //         GROUP BY d.tx_hash
+        //     ) AS nup
+        //     WHERE status != $status
+        //     ORDER BY tx_index ASC;
+        // `; // nup => no updates
 
         // v9
         // const sql = `
@@ -1017,10 +1133,31 @@ class Queries {
                     ON d.block_index = b.block_index
                 WHERE d.source = $address
                 GROUP BY d.tx_hash
+                ORDER BY _rowid DESC
             ) AS nup
             WHERE status = $status
             ORDER BY tx_index ASC;
         `; // nup => no updates
+
+        // // v10
+        // const sql = `
+        //     SELECT *
+        //     FROM (
+        //         SELECT
+        //             MAX(d.rowid) AS _rowid,
+        //             d.*,
+        //             CAST(d.satoshirate AS TEXT) AS satoshirate_text,
+        //             CAST(d.give_quantity AS TEXT) AS give_quantity_text,
+        //             b.block_time
+        //         FROM dispensers d
+        //         JOIN blocks b
+        //             ON d.block_index = b.block_index
+        //         WHERE d.source = $address
+        //         GROUP BY d.tx_hash
+        //     ) AS nup
+        //     WHERE status = $status
+        //     ORDER BY tx_index ASC;
+        // `; // nup => no updates
 
         // v9
         // const sql = `
@@ -1063,10 +1200,31 @@ class Queries {
                     ON o.tx_index_block = b.block_index
                 WHERE o.get_asset = $asset_name
                 GROUP BY o.tx_hash
+                ORDER BY _rowid DESC
             ) AS nup
             WHERE status = $status
             ORDER BY tx_index ASC;
         `; // nup => no updates
+
+        // // v10.CNTRPRTY tx_index_block
+        // const sql = `
+        //     SELECT *
+        //     FROM (
+        //         SELECT
+        //             MAX(o.rowid) AS _rowid,
+        //             o.*,
+        //             CAST(o.give_remaining AS TEXT) AS give_remaining_text,
+        //             CAST(o.get_remaining AS TEXT) AS get_remaining_text,
+        //             b.block_time
+        //         FROM orders o
+        //         JOIN blocks b
+        //             ON o.tx_index_block = b.block_index
+        //         WHERE o.get_asset = $asset_name
+        //         GROUP BY o.tx_hash
+        //     ) AS nup
+        //     WHERE status = $status
+        //     ORDER BY tx_index ASC;
+        // `; // nup => no updates
 
         // // v10
         // const sql = `
@@ -1224,22 +1382,42 @@ class Queries {
 
     static async getOrderMatchesRows(db, tx_hash) {
 
-        // v10.CNTRPRTY tx_index_block (tx1_index_block)
+        // v10.CNTRPRTY
         const sql = `
             SELECT
-                MAX(om.rowid) AS _rowid,
                 om.*,
                 CAST(om.forward_quantity AS TEXT) AS forward_quantity_text,
                 CAST(om.backward_quantity AS TEXT) AS backward_quantity_text,
                 b.block_time
             FROM order_matches om
             JOIN blocks b
-                ON om.tx1_index_block = b.block_index
-            WHERE om.tx0_hash = $tx_hash
-            OR om.tx1_hash = $tx_hash
-            GROUP BY om.id
-            ORDER BY tx1_index_block ASC;
-        `; // ? tx1_index ASC is not returning the correct order (3e51d963060c9a0f042653b44e3e59555162ed2b7acda32b8d6635643b6a93d1)
+                ON om.block_index = b.block_index
+            WHERE om.rowid IN (
+                SELECT MAX(rowid)
+                FROM order_matches
+                WHERE tx0_hash = $tx_hash
+                OR tx1_hash = $tx_hash
+                GROUP BY id
+            )
+            ORDER BY om.tx1_index ASC;
+        `;
+
+        // // v10.CNTRPRTY tx_index_block (tx1_index_block)
+        // const sql = `
+        //     SELECT
+        //         MAX(om.rowid) AS _rowid,
+        //         om.*,
+        //         CAST(om.forward_quantity AS TEXT) AS forward_quantity_text,
+        //         CAST(om.backward_quantity AS TEXT) AS backward_quantity_text,
+        //         b.block_time
+        //     FROM order_matches om
+        //     JOIN blocks b
+        //         ON om.tx1_index_block = b.block_index
+        //     WHERE om.tx0_hash = $tx_hash
+        //     OR om.tx1_hash = $tx_hash
+        //     GROUP BY om.id
+        //     ORDER BY tx1_index_block ASC;
+        // `; // ? tx1_index ASC is not returning the correct order (3e51d963060c9a0f042653b44e3e59555162ed2b7acda32b8d6635643b6a93d1)
 
         // v9
         // const sql = `
@@ -1275,7 +1453,8 @@ class Queries {
                 FROM order_matches
                 WHERE tx0_hash = $tx_hash
                 OR tx1_hash = $tx_hash
-            );
+            )
+            ORDER BY tx_index ASC;
         `;
         const params_obj = {
             tx_hash,
